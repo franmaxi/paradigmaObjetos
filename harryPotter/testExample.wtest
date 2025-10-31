@@ -1,9 +1,188 @@
-import example.pepita
+import harryPotter.*
 
-describe "group of tests for pepita" {
-
-  test "pepita has initial energy" {
-    assert.equals(100, pepita.energy())
+describe "Tests del Sistema de Hogwarts" {  
+  test "Un estudiante puede recibir daño y disminuir su salud" {
+    harryPotter.recibirDanio(30)
+    assert.equals(70, harryPotter.salud())
   }
-
+  
+  test "Un estudiante de Gryffindor no es peligroso" {
+    assert.notThat(harryPotter.esPeligroso())
+  }
+  
+  test "Un estudiante de Slytherin es peligroso" {
+    assert.that(dracoMalfoy.esPeligroso())
+  }
+  
+  test "Un estudiante de Ravenclaw con habilidad > 10 es peligroso" {
+    const luna = new Estudiante(casa = ravenclaw, habilidad = 11, sangrePura = false)
+    assert.that(luna.esPeligroso())
+  }
+  
+  test "Un estudiante de Ravenclaw con habilidad <= 10 no es peligroso" {
+    const cho = new Estudiante(casa = ravenclaw, habilidad = 10, sangrePura = false)
+    assert.notThat(cho.esPeligroso())
+  }
+  
+  test "Un estudiante de Hufflepuff sangre pura es peligroso" {
+    const cedric = new Estudiante(casa = hufflepuff, habilidad = 12, sangrePura = true)
+    assert.that(cedric.esPeligroso())
+  }
+  
+  test "Un estudiante con salud 0 no es peligroso" {
+    dracoMalfoy.salud(0)
+    assert.notThat(dracoMalfoy.esPeligroso())
+  }
+  
+  test "Un estudiante puede cambiar de casa" {
+    harryPotter.cambiarCasa(slytherin)
+    assert.equals(slytherin, harryPotter.casa())
+  }
+    
+  test "Un estudiante se puede inscribir a una materia" {
+    harryPotter.inscribirmeEn(defensaContraLasArtesOscuras)
+    assert.that(harryPotter.materias().contains(defensaContraLasArtesOscuras))
+  }
+  
+  test "Cuando un estudiante se inscribe, la materia lo registra" {
+    const pociones = new Materia(profesor = "Snape", hechizo = immobilus)
+    hermioneGranger.inscribirmeEn(pociones)
+    pociones.dictarClases()
+    assert.that(hermioneGranger.hechizos().contains(immobilus))
+  }
+  
+  test "Un estudiante se puede dar de baja de una materia" {
+    harryPotter.inscribirmeEn(defensaContraLasArtesOscuras)
+    harryPotter.darmeDeBaja(defensaContraLasArtesOscuras)
+    assert.notThat(harryPotter.materias().contains(defensaContraLasArtesOscuras))
+  }
+  
+  test "Al dictar una clase, los estudiantes aprenden el hechizo" {
+    harryPotter.inscribirmeEn(defensaContraLasArtesOscuras)
+    hermioneGranger.inscribirmeEn(defensaContraLasArtesOscuras)
+    
+    defensaContraLasArtesOscuras.dictarClases()
+    
+    assert.that(harryPotter.hechizos().contains(immobilus))
+    assert.that(hermioneGranger.hechizos().contains(immobilus))
+  }
+  
+  test "Al dictar una clase, los estudiantes aumentan su habilidad en 1" {
+    const habilidadInicial = harryPotter.habilidad()
+    harryPotter.inscribirmeEn(defensaContraLasArtesOscuras)
+    
+    defensaContraLasArtesOscuras.dictarClases()
+    
+    assert.equals(habilidadInicial + 1, harryPotter.habilidad())
+  }
+  
+  test "Una materia puede cambiar el hechizo que enseña" {
+    defensaContraLasArtesOscuras.cambiarHechizo(expelliarmus)
+    assert.equals(expelliarmus, defensaContraLasArtesOscuras.hechizo())
+  }
+  
+  test "Harry puede hacer Immobilus porque tiene habilidad suficiente" {
+    harryPotter.tomarClase(immobilus)
+    harryPotter.hacerHechizo(immobilus, lechuza)
+    assert.equals(85, lechuza.salud())
+  }
+  
+  test "Draco no puede hacer Immobilus por falta de habilidad" {
+    dracoMalfoy.tomarClase(immobilus)
+    assert.throwsExceptionWithMessage(
+      "No cumplo las condiciones para lanzar este hechizo",
+      { dracoMalfoy.hacerHechizo(immobilus, lechuza) }
+    )
+  }
+  
+  test "Ron no puede hacer Immobilus porque no lo aprendió" {
+    assert.throwsExceptionWithMessage(
+      "No aprendí ese hechizo",
+      { ronWeasley.hacerHechizo(immobilus, lechuza) }
+    )
+  }
+  
+  test "Un hechizo comun reduce la salud del destinatario en nivelDificultad + 10" {
+    harryPotter.tomarClase(immobilus)
+    harryPotter.hacerHechizo(immobilus, lechuza)
+    assert.equals(85, lechuza.salud())
+  }
+  
+  test "Un hechizo común no afecta al lanzador" {
+    harryPotter.tomarClase(immobilus)
+    const saludInicial = harryPotter.salud()
+    harryPotter.hacerHechizo(immobilus, lechuza)
+    assert.equals(saludInicial, harryPotter.salud())
+  }
+  
+  
+  test "Un hechizo imperdonable hace el doble de daño que uno común" {
+    hermioneGranger.tomarClase(cruciatus)
+    hermioneGranger.hacerHechizo(cruciatus, basilisco)
+    assert.equals(50, basilisco.salud())
+  }
+  
+  test "Un hechizo imperdonable daña también al lanzador" {
+    hermioneGranger.tomarClase(cruciatus)
+    hermioneGranger.hacerHechizo(cruciatus, basilisco)
+    assert.equals(80, hermioneGranger.salud())
+  }
+  
+  test "Avada Kedavra requiere habilidad 20 y no puede ser lanzado por Harry" {
+    harryPotter.tomarClase(avadakedabra)
+    assert.throwsExceptionWithMessage(
+      "No cumplo las condiciones para lanzar este hechizo",
+      { harryPotter.hacerHechizo(avadakedabra, lechuza) }
+    )
+  }
+    
+  test "Sectum Sempra solo puede ser lanzado por estudiantes no peligrosos" {
+    harryPotter.tomarClase(sectumSempra)
+    harryPotter.hacerHechizo(sectumSempra, lechuza)
+    assert.equals(78, lechuza.salud())
+  }
+  
+  test "Sectum Sempra no puede ser lanzado por estudiantes peligrosos" {
+    dracoMalfoy.tomarClase(sectumSempra)
+    dracoMalfoy.habilidad(20)
+    assert.throwsExceptionWithMessage(
+      "No cumplo las condiciones para lanzar este hechizo",
+      { dracoMalfoy.hacerHechizo(sectumSempra, lechuza) }
+    )
+  }
+  
+  test "Sectum Sempra reduce la habilidad del lanzador en 1" {
+    harryPotter.tomarClase(sectumSempra)
+    const habilidadInicial = harryPotter.habilidad()
+    harryPotter.hacerHechizo(sectumSempra, lechuza)
+    assert.equals(habilidadInicial - 1, harryPotter.habilidad())
+  }
+    
+  test "En una práctica, todos los estudiantes que pueden hacen el hechizo" {
+    harryPotter.inscribirmeEn(defensaContraLasArtesOscuras)
+    hermioneGranger.inscribirmeEn(defensaContraLasArtesOscuras)
+    dracoMalfoy.inscribirmeEn(defensaContraLasArtesOscuras)
+    
+    defensaContraLasArtesOscuras.dictarClases()
+    defensaContraLasArtesOscuras.practicarHechizo(lechuza)
+    
+    assert.equals(70, lechuza.salud())
+  }
+    
+  test "Una criatura puede recibir daño" {
+    lechuza.recibirDanio(40)
+    assert.equals(60, lechuza.salud())
+  }
+  
+  test "Un estudiante puede lanzar un hechizo a una criatura" {
+    harryPotter.tomarClase(immobilus)
+    harryPotter.hacerHechizo(immobilus, lechuza)
+    assert.equals(85, lechuza.salud())
+  }
+  
+  test "Un estudiante puede lanzar un hechizo a otro estudiante" {
+    hermioneGranger.tomarClase(immobilus)
+    hermioneGranger.hacerHechizo(immobilus, dracoMalfoy)
+    assert.equals(85, dracoMalfoy.salud())
+  }
 }
