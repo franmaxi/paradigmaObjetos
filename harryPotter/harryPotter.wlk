@@ -73,7 +73,7 @@ class Materia{
 }
 
 
-class Hechizo {
+class HechizoComun {
   const nivelDificultad
 
   method puedeSerLanzadoPor(estudiante)  = nivelDificultad <= estudiante.habilidad()
@@ -86,17 +86,17 @@ class Hechizo {
   }
 }
 
-class HechizoComun inherits Hechizo{
-}
+//class HechizoComun inherits Hechizo{
+//}
 
-class HechizoImperdonable inherits Hechizo{
+class HechizoImperdonable inherits HechizoComun{
     const dañoLanzador
 
     override method afectarDestinatario(destinatario){destinatario.recibirDanio((nivelDificultad + 10)*2)}
     override method afectarLanzador(estudiante) {estudiante.recibirDanio(dañoLanzador)}
 }
 
-class HechizoImposible inherits Hechizo{
+class HechizoImposible inherits HechizoComun{
   override method afectarLanzador(estudiante){estudiante.disminuirHabilidad(1)}
   override method puedeSerLanzadoPor(estudiante) = !estudiante.esPeligroso()
 }
